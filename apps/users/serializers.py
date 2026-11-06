@@ -1,69 +1,82 @@
-from .models import *
-from rest_framework import serializers
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import authenticate
+from rest_framework import serializers
 
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
-            'id',
-            'username',
-            'email',
-            'role',
-            'is_active',
-        ]
+        fields = ['id', 'username', 'email', 'role', 'is_active']
+        read_only_fields = fields
 
-#____________________________________________________________________________________________
+
 class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, trim_whitespace=False)
+    password_confirmation = serializers.CharField(
+        write_only=True, required=False, trim_whitespace=False,
+        help_text='Optional for backwards compatibility; when supplied it must match password.',
+    )
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'role', 'is_active']
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'role': {'read_only': True, 'default': 'member'},
-            'is_active': {'read_only': True},
-        }
+        fields = ['username', 'email', 'password', 'password_confirmation']
+        extra_kwargs = {'username': {'required': True}, 'email': {'required': True}}
+
+    def validate(self, attrs):
+        confirmation = attrs.pop('password_confirmation', None)
+        if confirmation is not None and confirmation != attrs['password']:
+            raise serializers.ValidationError({'password_confirmation': 'Passwords do not match.'})
+        return attrs
 
     def validate_password(self, value):
-        validate_password(value)  # اینجا بررسی امنیتی انجام میشه
+        validate_password(value)
         return value
 
     def create(self, validated_data):
         return User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            password=validated_data['password'],
-            role='member'
+            username=validated_data['username'], email=validated_data['email'],
+            password=validated_data['password'], role='member',
         )
-#_____________________________________________________________________
+
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
 
     def validate(self, attrs):
-        username = attrs.get('username')
-        password = attrs.get('password')
-
-        user = authenticate(username=username, password=password)
+        user = authenticate(username=attrs.get('username'), password=attrs.get('password'))
         if not user:
-            raise serializers.ValidationError("Invalid username or password.")
-
+            raise serializers.ValidationError('Invalid username or password.')
         if not user.is_active:
-            raise serializers.ValidationError(
-                "Your account is inactive. The activation link has been sent to your email."
-            )
-
+            raise serializers.ValidationError('Your account is inactive.')
         attrs['user'] = user
         return attrs
-#________________________________________________________________________
+
+
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 
-    def validate_refresh(self, value):
-        if not value:
-            raise serializers.ValidationError("Refresh token is required for logout.")
-        return value
-#_________________________________________________________________________    
+
+class TokenPairSerializer(serializers.Serializer):
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+
+
+class TokenRefreshRequestSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+
+class TokenRefreshResponseSerializer(serializers.Serializer):
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True, required=False)
+
+
+class ErrorResponseSerializer(serializers.Serializer):
+    detail = serializers.CharField(required=False)
+    username = serializers.ListField(child=serializers.CharField(), required=False)
+    email = serializers.ListField(child=serializers.CharField(), required=False)
+    password = serializers.ListField(child=serializers.CharField(), required=False)
+    password_confirmation = serializers.ListField(child=serializers.CharField(), required=False)
+    non_field_errors = serializers.ListField(child=serializers.CharField(), required=False)

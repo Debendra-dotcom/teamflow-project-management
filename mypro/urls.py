@@ -18,6 +18,28 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse
+from apps.users.serializers import LoginSerializer, TokenPairSerializer, TokenRefreshRequestSerializer, TokenRefreshResponseSerializer, ErrorResponseSerializer
+
+
+class DocumentedTokenObtainPairView(TokenObtainPairView):
+    @extend_schema(
+        request=LoginSerializer,
+        responses={200: TokenPairSerializer, 400: OpenApiResponse(ErrorResponseSerializer)},
+        examples=[OpenApiExample('Token request', value={'username': 'alex', 'password': 'StrongPass123!'}, request_only=True)],
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class DocumentedTokenRefreshView(TokenRefreshView):
+    @extend_schema(
+        request=TokenRefreshRequestSerializer,
+        responses={200: TokenRefreshResponseSerializer, 401: OpenApiResponse(ErrorResponseSerializer)},
+        examples=[OpenApiExample('Refresh request', value={'refresh': '<refresh-token>'}, request_only=True)],
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -29,8 +51,8 @@ urlpatterns = [
     path('api/teams/', include('apps.teams.urls')),   
     path('api/projects/', include('apps.projects.urls')), 
     path('api/tasks/', include('apps.tasks.urls')),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), 
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), 
+    path('api/token/', DocumentedTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', DocumentedTokenRefreshView.as_view(), name='token_refresh'),
     # swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

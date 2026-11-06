@@ -1,0 +1,1422 @@
+openapi: 3.0.3
+info:
+  title: Task & Team Management API
+  version: 1.0.0
+  description: A simple Trello/Jira-like API with JWT auth, permissions, and tests.
+paths:
+  /api/projects/:
+    get:
+      operationId: projects_list
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Projects'
+          description: ''
+    post:
+      operationId: projects_create
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectsRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Projects'
+          description: ''
+  /api/projects/{id}/:
+    get:
+      operationId: projects_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Projects'
+          description: ''
+    put:
+      operationId: projects_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectsRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Projects'
+          description: ''
+    patch:
+      operationId: projects_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - projects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProjectsRequest'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Projects'
+          description: ''
+    delete:
+      operationId: projects_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - projects
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/tasks/:
+    get:
+      operationId: tasks_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - tasks
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTaskList'
+          description: ''
+    post:
+      operationId: tasks_create
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+  /api/tasks/{id}/:
+    get:
+      operationId: tasks_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - tasks
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+    put:
+      operationId: tasks_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+    patch:
+      operationId: tasks_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskRequest'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+          description: ''
+    delete:
+      operationId: tasks_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - tasks
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/tasks/{task_id}/comments/:
+    get:
+      operationId: tasks_comments_list
+      parameters:
+      - in: path
+        name: task_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - tasks
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+          description: ''
+    post:
+      operationId: tasks_comments_create
+      parameters:
+      - in: path
+        name: task_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/tasks/{task_id}/comments/{id}/:
+    get:
+      operationId: tasks_comments_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - tasks
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+    put:
+      operationId: tasks_comments_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+    patch:
+      operationId: tasks_comments_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentRequest'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+          description: ''
+    delete:
+      operationId: tasks_comments_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - tasks
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/teams/:
+    get:
+      operationId: teams_list
+      tags:
+      - teams
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamSerialiser'
+          description: ''
+    post:
+      operationId: teams_create
+      tags:
+      - teams
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamSerialiserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TeamSerialiserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TeamSerialiserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSerialiser'
+          description: ''
+  /api/teams/{id}/:
+    get:
+      operationId: teams_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - teams
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSerialiser'
+          description: ''
+    put:
+      operationId: teams_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - teams
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamSerialiserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TeamSerialiserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TeamSerialiserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSerialiser'
+          description: ''
+    patch:
+      operationId: teams_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - teams
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamSerialiserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamSerialiserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamSerialiserRequest'
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSerialiser'
+          description: ''
+    delete:
+      operationId: teams_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - teams
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              TokenRequest:
+                value:
+                  username: alex
+                  password: StrongPass123!
+                summary: Token request
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequestRequest'
+            examples:
+              RefreshRequest:
+                value:
+                  refresh: <refresh-token>
+                summary: Refresh request
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefreshResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /api/users/:
+    get:
+      operationId: users_list
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: users_create
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/users/{id}/:
+    get:
+      operationId: users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/users/login/:
+    post:
+      operationId: users_login_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              LoginRequest:
+                value:
+                  username: alex
+                  password: StrongPass123!
+                summary: Login request
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid credentials
+  /api/users/logout/:
+    post:
+      operationId: users_logout_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+            examples:
+              LogoutRequest:
+                value:
+                  refresh: <refresh-token>
+                summary: Logout request
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '205':
+          description: Refresh token blacklisted
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /api/users/registration/:
+    post:
+      operationId: users_registration_create
+      description: Creates a member account. Password confirmation is optional for
+        backwards compatibility.
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              RegistrationRequest:
+                value:
+                  username: alex
+                  email: alex@example.com
+                  password: StrongPass123!
+                  password_confirmation: StrongPass123!
+                summary: Registration request
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Validation error
+components:
+  schemas:
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        task:
+          type: integer
+          readOnly: true
+        task_detail:
+          allOf:
+          - $ref: '#/components/schemas/Task'
+          readOnly: true
+        author:
+          type: integer
+          readOnly: true
+        author_detail:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - author_detail
+      - content
+      - created_at
+      - id
+      - task
+      - task_detail
+    CommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+      required:
+      - content
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+        username:
+          type: array
+          items:
+            type: string
+        email:
+          type: array
+          items:
+            type: string
+        password:
+          type: array
+          items:
+            type: string
+        password_confirmation:
+          type: array
+          items:
+            type: string
+        non_field_errors:
+          type: array
+          items:
+            type: string
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    LogoutRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    PaginatedTaskList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+    PatchedCommentRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+    PatchedProjectsRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        team:
+          type: integer
+        is_active:
+          type: boolean
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+    PatchedTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 50
+        description:
+          type: string
+          minLength: 1
+        project:
+          type: integer
+          writeOnly: true
+        assigned_to:
+          type: integer
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          minimum: 0
+          maximum: 9223372036854775807
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        attachment:
+          type: string
+          format: binary
+          nullable: true
+    PatchedTeamSerialiserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        members:
+          type: array
+          items:
+            type: integer
+    PriorityEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      type: integer
+      description: |-
+        * `1` - High
+        * `2` - Medium
+        * `3` - Low
+    Projects:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 30
+        team:
+          type: integer
+        team_detail:
+          allOf:
+          - $ref: '#/components/schemas/TeamSerialiser'
+          readOnly: true
+        created_by_detail:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        is_active:
+          type: boolean
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - created_by_detail
+      - id
+      - name
+      - team
+      - team_detail
+    ProjectsRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        team:
+          type: integer
+        is_active:
+          type: boolean
+        start_date:
+          type: string
+          format: date
+          nullable: true
+        end_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - name
+      - team
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password_confirmation:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Optional for backwards compatibility; when supplied it must
+            match password.
+      required:
+      - email
+      - password
+      - username
+    RoleEnum:
+      enum:
+      - admin
+      - team_owner
+      - member
+      type: string
+      description: |-
+        * `admin` - Admin
+        * `team_owner` - Team Owner
+        * `member` - Member
+    StatusEnum:
+      enum:
+      - todo
+      - doing
+      - done
+      type: string
+      description: |-
+        * `todo` - TODO
+        * `doing` - DOING
+        * `done` - DONE
+    Task:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+        project_detail:
+          allOf:
+          - $ref: '#/components/schemas/Projects'
+          readOnly: true
+        assigned_to:
+          type: integer
+          nullable: true
+        assigned_to_detail:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          minimum: 0
+          maximum: 9223372036854775807
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        attachment:
+          type: string
+          format: uri
+          nullable: true
+      required:
+      - assigned_to_detail
+      - description
+      - project_detail
+      - title
+    TaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 50
+        description:
+          type: string
+          minLength: 1
+        project:
+          type: integer
+          writeOnly: true
+        assigned_to:
+          type: integer
+          nullable: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          minimum: 0
+          maximum: 9223372036854775807
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        attachment:
+          type: string
+          format: binary
+          nullable: true
+      required:
+      - description
+      - project
+      - title
+    TeamSerialiser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 30
+        owner:
+          type: integer
+          readOnly: true
+        owner_detail:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        members:
+          type: array
+          items:
+            type: integer
+        members_detail:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          readOnly: true
+        created_at:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - members_detail
+      - name
+      - owner
+      - owner_detail
+    TeamSerialiserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        members:
+          type: array
+          items:
+            type: integer
+      required:
+      - name
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenRefreshRequestRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenRefreshResponse:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+        email:
+          type: string
+          format: email
+          readOnly: true
+          title: Email address
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+      required:
+      - email
+      - id
+      - is_active
+      - role
+      - username
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

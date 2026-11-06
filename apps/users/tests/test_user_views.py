@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from rest_framework import status
+from django.core.cache import cache
 
 User = get_user_model()
 
@@ -9,6 +10,7 @@ User = get_user_model()
 class UserViewsTests(APITestCase):
 
     def setUp(self):
+        cache.clear()
         # Users
         self.admin = User.objects.create_user(
             username="admin",
@@ -58,6 +60,22 @@ class UserViewsTests(APITestCase):
         res = self.client.post(self.register_url, payload, format="json")
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_register_duplicate_username_and_password_confirmation(self):
+        payload = {
+            "username": "member", "email": "new@test.com",
+            "password": "NewPass123!", "password_confirmation": "NewPass123!",
+        }
+        res = self.client.post(self.register_url, payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_mismatched_password_confirmation(self):
+        payload = {
+            "username": "newuser", "email": "new@test.com",
+            "password": "NewPass123!", "password_confirmation": "Different123!",
+        }
+        res = self.client.post(self.register_url, payload, format="json")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
     # ==================================================
     # LOGIN
     # ==================================================
@@ -74,6 +92,26 @@ class UserViewsTests(APITestCase):
         res = self.client.post(self.login_url, payload, format="json")
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_token_endpoints_and_authenticated_access(self):
+        pair = self.client.post("/api/token/", {
+            "username": "member", "password": "MemberPass123!",
+        }, format="json")
+        self.assertEqual(pair.status_code, status.HTTP_200_OK)
+        self.assertIn("access", pair.data)
+        self.assertIn("refresh", pair.data)
+
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + pair.data["access"])
+        protected = self.client.get(self.user_list_url)
+        self.assertEqual(protected.status_code, status.HTTP_200_OK)
+        self.client.credentials()
+        self.assertEqual(self.client.get(self.user_list_url).status_code, status.HTTP_401_UNAUTHORIZED)
+
+        refreshed = self.client.post("/api/token/refresh/", {
+            "refresh": pair.data["refresh"],
+        }, format="json")
+        self.assertEqual(refreshed.status_code, status.HTTP_200_OK)
+        self.assertIn("access", refreshed.data)
 
     def test_login_fail_inactive_user(self):
         self.member.is_active = False
@@ -104,6 +142,10 @@ class UserViewsTests(APITestCase):
         res = self.client.post(self.logout_url, logout_payload, format="json")
 
         self.assertEqual(res.status_code, status.HTTP_205_RESET_CONTENT)
+        refresh_res = self.client.post("/api/token/refresh/", {
+            "refresh": refresh_token,
+        }, format="json")
+        self.assertEqual(refresh_res.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_logout_fail_invalid_token(self):
         self.client.force_authenticate(user=self.member)
