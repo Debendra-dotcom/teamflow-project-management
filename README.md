@@ -203,7 +203,7 @@ This project demonstrates real-world backend skills including:
 
 ## 👤 Author
 
-**Hosna (hanaprogramer)**  
+**Debendranath(Developer)**  
 Backend Developer | Django REST Framework
 
 
